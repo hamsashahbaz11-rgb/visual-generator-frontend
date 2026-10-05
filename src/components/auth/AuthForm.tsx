@@ -13,15 +13,18 @@
 // }
 // ```tsx
 import { FormEvent, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Sparkles } from 'lucide-react'
 import { useAuth } from '../../hooks/useApi'
 import { getApiError } from '../../services/api'
 import { loginSchema, registerSchema } from '../../utils/validation'
 import { ErrorAlert } from '../common/ErrorAlert'
+import { useToast } from '../../hooks/useToast'
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const { login, register } = useAuth()
+  const navigate = useNavigate()
+  const { showToast } = useToast()
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -47,8 +50,12 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
     try {
       await mutation.mutateAsync(result.data as never)
+      showToast(isRegister ? 'Account created successfully!' : 'Welcome back!', 'success')
+      navigate('/', { replace: true })
     } catch (reason) {
-      setError(getApiError(reason, 'Unable to authenticate'))
+      const errorMessage = getApiError(reason, 'Unable to authenticate')
+      setError(errorMessage)
+      showToast(errorMessage, 'error')
     }
   }
 

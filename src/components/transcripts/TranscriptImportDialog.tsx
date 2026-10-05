@@ -3,7 +3,7 @@ import { Check, X } from 'lucide-react'
 import { getApiError } from '../../services/api'
 import { transcriptsApi } from '../../services/transcripts'
 
-export function TranscriptImportDialog({ assetId, onClose, onImported }: { assetId: string; onClose: () => void; onImported: (id: string) => void }) {
+export function TranscriptImportDialog({ assetId, projectId, onClose, onImported }: { assetId: string; projectId: string; onClose: () => void; onImported: (id: string) => void }) {
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -12,7 +12,7 @@ export function TranscriptImportDialog({ assetId, onClose, onImported }: { asset
     try {
       setSaving(true)
       const transcript = JSON.parse(value) as unknown
-      const result = await transcriptsApi.import(assetId, transcript)
+      const result = await transcriptsApi.import(assetId, transcript, projectId)
       onImported(result.id)
       onClose()
     } catch (reason) {
