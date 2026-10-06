@@ -9,7 +9,24 @@ export interface Asset { id: string; kind: AssetKind; originalName: string; stor
 export interface TranscriptWord { word: string; start: number; end: number }
 export interface Transcript { id: string; assetId: string; language?: string | null; text: string; words: TranscriptWord[]; durationSeconds?: number | null; createdAt: string }
 export interface ShareUrl { url: string; expiresAt: string }
-export interface Component { id: string; name: string; displayName: string; description: string; propsSchema: Record<string, unknown>; defaultProps: Record<string, unknown>; enterStyles: string[]; exitStyles: string[]; colorProps: string[]; refProps: string[]; assetProps: string[]; matchedField?: 'name' | 'description' }
+export interface Component {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string;
+  propsSchema: Record<string, unknown>;
+  defaultProps: Record<string, unknown>;
+  enterStyles: string[];
+  exitStyles: string[];
+  colorProps: string[];
+  refProps: string[];
+  assetProps: string[];
+  userId?: string | null;
+  isPublic: boolean | string;
+  createdAt: string;
+  updatedAt: string;
+  matchedField?: 'name' | 'description';
+}
 export interface Issue { path: string; code: string; message: string }
 export interface ValidationResult { valid: boolean; issues: Issue[] }
 export interface GenerationResponse { spec: Record<string, unknown>; issues: Issue[]; attempts: number }
