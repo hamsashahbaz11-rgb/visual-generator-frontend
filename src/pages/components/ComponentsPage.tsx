@@ -4,6 +4,7 @@ import { Search, Plus, Filter, ChevronDown, MoreVertical, Edit, Trash2, Eye, Cop
 import { componentsApi } from '../../services/components'
 import type { Component } from '../../types/api'
 import { useToast } from '../../hooks/useToast'
+import { Navbar } from '../../components/layout/Navbar'
 
 type FilterType = 'all' | 'mine' | 'public' | 'project'
 
@@ -124,6 +125,7 @@ export function ComponentsPage() {
 
   return (
     <div className="components-page">
+      <Navbar onBack={() => navigate('/')} />
       <header className="page-header">
         <div className="header-left">
           <h1>Components</h1>

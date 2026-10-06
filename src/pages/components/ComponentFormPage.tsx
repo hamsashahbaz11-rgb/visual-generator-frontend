@@ -522,6 +522,19 @@ function StyleMultiSelect({
     onChange(value.includes(style) ? value.filter(s => s !== style) : [...value, style])
   }
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const dropdown = document.querySelector('.multi-select-dropdown')
+      const trigger = document.querySelector('.multi-select-trigger')
+      if (trigger && dropdown && !trigger.contains(event.target as Node) && !dropdown.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
   return (
     <div className="multi-select">
       <div className="multi-select-trigger" onClick={() => setOpen(!open)}>
@@ -553,6 +566,8 @@ function StyleMultiSelect({
               type="button"
               className="dropdown-option"
               onClick={(e) => { e.stopPropagation(); toggle(opt); setSearch(''); }}
+              onMouseOver={(e) => e.currentTarget.classList.add('hovered')}
+              onMouseOut={(e) => e.currentTarget.classList.remove('hovered')}
             >
               {opt}
             </button>
@@ -585,6 +600,19 @@ function PropMultiSelect({
     onChange(value.includes(prop) ? value.filter(p => p !== prop) : [...value, prop])
   }
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const dropdown = document.querySelector('.multi-select-dropdown')
+      const trigger = document.querySelector('.multi-select-trigger')
+      if (trigger && dropdown && !trigger.contains(event.target as Node) && !dropdown.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
   return (
     <div className="multi-select">
       <div className="multi-select-trigger" onClick={() => setOpen(!open)}>
@@ -609,6 +637,8 @@ function PropMultiSelect({
               type="button"
               className="dropdown-option"
               onClick={(e) => { e.stopPropagation(); toggle(prop); }}
+              onMouseOver={(e) => e.currentTarget.classList.add('hovered')}
+              onMouseOut={(e) => e.currentTarget.classList.remove('hovered')}
             >
               {prop}
             </button>
