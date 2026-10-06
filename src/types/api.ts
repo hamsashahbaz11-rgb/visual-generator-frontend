@@ -33,3 +33,64 @@ export interface GenerationResponse { spec: Record<string, unknown>; issues: Iss
 export interface Render { id: string; projectId: string; status: RenderStatus; progress: number; specSnapshot: Record<string, unknown>; outputAssetId?: string | null; error?: string | null; createdAt: string; updatedAt: string }
 export interface ManualPromptResponse { promptText: string }
 export interface ApiErrorPayload { error?: { code?: string; message?: string; details?: unknown[] } }
+
+export interface InstancePosition { x: number; y: number }
+export interface InstanceSize { width: number; height: number }
+export interface InstanceTransform { rotation: number; scaleX: number; scaleY: number }
+export interface InstanceStyle { opacity: number; [key: string]: unknown }
+export interface InstanceTiming { start: number; duration: number }
+export interface InstanceAnimation { enter: string[]; exit: string[]; keyframes: unknown[] }
+
+export interface ComponentInstance {
+  id: string
+  sceneId: string
+  componentDefinitionId: string
+  groupId?: string | null
+  props: Record<string, unknown>
+  position: InstancePosition
+  size: InstanceSize
+  transform: InstanceTransform
+  style: InstanceStyle
+  visible: boolean
+  zIndex: number
+  timing: InstanceTiming
+  animation: InstanceAnimation
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface DocumentGroup {
+  id: string
+  sceneId: string
+  parentGroupId?: string | null
+  name: string
+  zIndex: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface SceneDocument {
+  id: string
+  projectId: string
+  name: string
+  description?: string | null
+  duration?: number | null
+  meta?: Record<string, unknown> | null
+  components: ComponentInstance[]
+  groups: DocumentGroup[]
+}
+
+export interface SceneSummary {
+  id: string
+  projectId: string
+  name: string
+  description?: string | null
+  duration?: number | null
+  meta?: Record<string, unknown> | null
+}
+
+export type CreateInstanceInput = Partial<Omit<ComponentInstance, 'id' | 'sceneId'>> & {
+  componentDefinitionId: string
+  props?: Record<string, unknown>
+}
+export type CreateGroupInput = { name: string; parentGroupId?: string | null; zIndex?: number }
