@@ -6,12 +6,14 @@ import { Navbar } from '../components/layout/Navbar'
 import { ErrorAlert } from '../components/common/ErrorAlert'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { useDocumentStore } from '../store/documentStore'
+import { useTimelineStore } from '../store/timelineStore'
 import { scenesApi } from '../services/scenes'
 import { componentsApi } from '../services/components'
 import { getApiError } from '../services/api'
 import type { Component, ComponentInstance, DocumentGroup } from '../types/api'
 import { SceneCanvas } from './SceneCanvas'
 import { ScenePreview } from './ScenePreview'
+import { Timeline } from '../components/timeline/Timeline'
 import { Inspector } from './Inspector'
 import { LayoutToolbar } from './LayoutToolbar'
 
@@ -28,6 +30,8 @@ export function SceneEditorPage() {
   const selectedInstanceId = useDocumentStore((s) => s.selectedInstanceId)
   const upsertInstance = useDocumentStore((s) => s.upsertInstance)
   const upsertGroup = useDocumentStore((s) => s.upsertGroup)
+  const currentFrame = useTimelineStore((s) => s.currentFrame)
+  const resetTimeline = useTimelineStore((s) => s.reset)
 
   const [actionError, setActionError] = useState('')
   const [newSceneName, setNewSceneName] = useState('')
@@ -50,8 +54,9 @@ export function SceneEditorPage() {
   useEffect(() => {
     setDocument(null)
     selectInstance(null)
+    resetTimeline()
     if (sceneId) void loadDocument(sceneId)
-  }, [sceneId, loadDocument, setDocument, selectInstance])
+  }, [sceneId, loadDocument, setDocument, selectInstance, resetTimeline])
 
   const selected = document?.components.find((c) => c.id === selectedInstanceId)
 
@@ -185,7 +190,8 @@ export function SceneEditorPage() {
         mode === 'preview' ? (
           <div className="scene-editor-main">
             <div className="scene-editor-canvas">
-              <ScenePreview document={document} definitions={definitions} />
+              <ScenePreview document={document} definitions={definitions} frame={currentFrame} />
+              <Timeline document={document} definitions={definitions} />
             </div>
           </div>
         ) : (
@@ -193,6 +199,7 @@ export function SceneEditorPage() {
             <div className="scene-editor-canvas">
               <LayoutToolbar document={document} />
               <SceneCanvas document={document} definitions={definitions} />
+              <Timeline document={document} definitions={definitions} />
             </div>
             <Inspector document={document} definitions={definitions} />
           </div>

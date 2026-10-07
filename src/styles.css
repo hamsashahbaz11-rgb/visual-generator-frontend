@@ -3637,3 +3637,199 @@ button {
   background: #2168d6;
   color: #fff;
 }
+
+/* Stage 3C — Timeline UI + playback */
+.tl-root {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface, #fff);
+  padding: 10px 12px;
+  outline: none;
+}
+
+.tl-root:focus-visible {
+  outline: 2px solid #2168d6;
+  outline-offset: 2px;
+}
+
+.tl-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.tl-title {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.tl-time {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tl-frame,
+.tl-fps {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.tl-header .tl-play {
+  margin-left: auto;
+}
+
+.tl-body {
+  overflow-x: auto;
+}
+
+.tl-tracks {
+  position: relative;
+  min-width: 100%;
+}
+
+.tl-ruler {
+  position: relative;
+  height: 34px;
+  border-bottom: 1px solid var(--border);
+  cursor: ew-resize;
+}
+
+.tl-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--border);
+  padding-left: 4px;
+  pointer-events: none;
+}
+
+.tl-tick-label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-tick-frame {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 30px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.tl-row:hover {
+  background: rgba(33, 104, 214, 0.05);
+}
+
+.tl-row.selected {
+  background: rgba(33, 104, 214, 0.12);
+}
+
+.tl-row-label {
+  flex: 0 0 160px;
+  width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tl-row-lane {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
+  cursor: ew-resize;
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent 59px,
+    rgba(0, 0, 0, 0.03) 59px,
+    rgba(0, 0, 0, 0.03) 60px
+  );
+}
+
+.tl-track-bar {
+  position: absolute;
+  top: 7px;
+  height: 16px;
+  border-radius: 4px;
+  background: #2168d6;
+  opacity: 0.75;
+}
+
+.tl-row.active .tl-track-bar {
+  opacity: 1;
+  box-shadow: 0 0 0 1px #174ea6;
+}
+
+.tl-row.hidden-instance .tl-track-bar {
+  background: #9aa0a6;
+  opacity: 0.45;
+}
+
+.tl-row-state {
+  flex: 0 0 64px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-align: right;
+}
+
+.tl-group-row {
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.tl-group-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.tl-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: #d93025;
+  pointer-events: none;
+}
+
+.tl-playhead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -5px;
+  border: 6px solid transparent;
+  border-top: 8px solid #d93025;
+}
+
+.tl-empty {
+  padding: 12px 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tl-hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
