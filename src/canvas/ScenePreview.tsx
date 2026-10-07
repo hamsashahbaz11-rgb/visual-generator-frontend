@@ -2,22 +2,27 @@ import type { CSSProperties } from 'react'
 import type { Component, ComponentInstance, SceneDocument } from '../types/api'
 import {
   buildRenderTree,
+  evaluateSceneAtFrame,
   type RenderNode,
   type RenderTreeNode,
 } from '@app/render'
 import { WORLD } from './viewport'
 import { resolveRenderer } from './renderers'
 
-// Deterministic preview (Stage 2D, Phase 10).
+// Deterministic preview (Stage 2D, Phase 10; frame-aware since Stage 3B).
 //
-// Renders the shared render tree — the same tree, styles, keys, references
-// and geometry the Remotion renderer consumes. No selection, dragging,
-// resize, inspector overlays, or editor guides: pure document → visuals.
+// Runs the shared Stage 3A evaluator at `frame`, then renders the shared
+// render tree — the same evaluated scene, styles, keys, references and
+// geometry the Remotion renderer consumes. No selection, dragging,
+// resize, inspector overlays, or editor guides: pure document + frame → visuals.
+// No timers or playback state here; callers pass the frame they want.
 
 interface PreviewProps {
   document: SceneDocument
   /** Component definitions by id (resolves instance.componentDefinitionId → name). */
   definitions: Map<string, Component>
+  /** Frame to evaluate (Stage 3B). Defaults to 0, keeping static scenes unchanged. */
+  frame?: number
 }
 
 const nodeStyle = (node: RenderNode): CSSProperties => ({
@@ -105,8 +110,17 @@ function PreviewNode({
   )
 }
 
-export function ScenePreview({ document, definitions }: PreviewProps) {
-  const tree = buildRenderTree(document)
+export function ScenePreview({ document, definitions, frame = 0 }: PreviewProps) {
+  // Same evaluator + tree as Remotion: document + frame → evaluated → tree.
+  // The evaluated scene feeds both the tree and the renderers, so animated
+  // connectors resolve against evaluated (moved) components. Never mutates.
+  const evaluatedScene = evaluateSceneAtFrame(document, frame)
+  const evaluatedDocument = {
+    ...document,
+    components: evaluatedScene.components,
+    groups: evaluatedScene.groups,
+  } as unknown as SceneDocument
+  const tree = buildRenderTree(evaluatedDocument)
   return (
     <div
       className="scene-canvas scene-preview"
@@ -123,7 +137,7 @@ export function ScenePreview({ document, definitions }: PreviewProps) {
           <PreviewInstance
             key={root.node.instance.id}
             node={root.node}
-            document={document}
+            document={evaluatedDocument}
             definitionName={
               definitions.get(root.node.instance.componentDefinitionId)?.name ?? 'unknown'
             }
@@ -132,7 +146,7 @@ export function ScenePreview({ document, definitions }: PreviewProps) {
           <PreviewNode
             key={root.group.id}
             treeNode={root}
-            document={document}
+            document={evaluatedDocument}
             definitions={definitions}
           />
         ),
