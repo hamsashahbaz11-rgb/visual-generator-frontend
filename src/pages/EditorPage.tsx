@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowUpRight, CheckCircle, Code2, Copy, FileAudio, FileImage, FileVideo, Film, Share2, Trash2, WandSparkles, XCircle } from 'lucide-react'
+import { ArrowUpRight, CheckCircle, Code2, Copy, FileAudio, FileImage, FileVideo, Film, Frame, Share2, Trash2, WandSparkles, XCircle } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Navbar } from '../components/layout/Navbar'
 import { AssetUploader } from '../components/assets/AssetUploader'
@@ -75,7 +75,7 @@ export function EditorPage() {
         <div className="asset-list">{assets.data?.map((asset) => <AssetRow asset={asset} key={asset.id} projectId={id!} onTranscriptCreated={setSelectedTranscriptId} onUseTranscript={setSelectedTranscriptId} onPrompt={() => setPromptAsset(asset)} onDelete={async (assetId, projectId) => { await assets.remove.mutateAsync({ id: assetId, projectId }); setSelectedTranscriptId('') }} />)}</div>
       </aside>
       <section className="canvas-area">
-        <div className="canvas-head"><div><div className="title-edit"><h1>{project.name}</h1></div><p>Last edited {new Date(project.updatedAt).toLocaleString()} · 16:9 · 1080p</p></div><div className="canvas-actions"><button className="button secondary" onClick={() => setSpecEditor(true)}><Code2 size={16} />Edit spec</button><button className="button primary" onClick={render} disabled={renders.create.isPending}><Film size={16} />Render video</button></div></div>
+        <div className="canvas-head"><div><div className="title-edit"><h1>{project.name}</h1></div><p>Last edited {new Date(project.updatedAt).toLocaleString()} · 16:9 · 1080p</p></div><div className="canvas-actions"><button className="button secondary" onClick={() => navigate(`/projects/${project.id}/canvas`)}><Frame size={16} />Open canvas</button><button className="button secondary" onClick={() => setSpecEditor(true)}><Code2 size={16} />Edit spec</button><button className="button primary" onClick={render} disabled={renders.create.isPending}><Film size={16} />Render video</button></div></div>
         <div className="tabs">{(['overview', 'preview', 'generate'] as const).map((item) => <button key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item[0].toUpperCase() + item.slice(1)}{item === 'generate' && <span className="tab-new">NEW</span>}</button>)}</div>
         {tab === 'overview' && <Overview project={project} onGenerate={() => setTab('generate')} onValidate={handleValidate} validateMutation={validate} validationResult={validationResult} />}
         {tab === 'preview' && <Preview spec={project.spec} assets={assets.data ?? []} />}

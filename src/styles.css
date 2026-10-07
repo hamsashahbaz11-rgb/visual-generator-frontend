@@ -3090,3 +3090,530 @@ button {
     gap: 2px;
   }
 }
+
+/* Stage 2A — Interactive canvas */
+.scene-editor-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 34px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.scene-switcher,
+.scene-editor-newscene,
+.scene-editor-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.scene-switcher select,
+.scene-editor-add select,
+.scene-editor-newscene input {
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--panel);
+  color: inherit;
+  font-size: 12px;
+  padding: 0 10px;
+  outline: 0;
+}
+
+.scene-editor-selection {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font: 11px 'DM Mono', monospace;
+  color: var(--muted);
+}
+
+.scene-editor-error {
+  padding: 12px 34px 0;
+}
+
+.scene-canvas-scroll {
+  overflow: auto;
+  padding: 28px 34px 60px;
+  background:
+    radial-gradient(circle, #d4d9e2 1px, transparent 1px) 0 0 / 22px 22px,
+    var(--soft);
+}
+
+.scene-canvas {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px #1018281f;
+  overflow: hidden;
+}
+
+.scene-canvas-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.canvas-group {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Group containers are non-interactive, but their contents stay clickable. */
+.canvas-group .canvas-instance,
+.canvas-group-chip,
+.canvas-resize-handle {
+  pointer-events: auto;
+}
+
+.canvas-instance {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.canvas-instance:active {
+  cursor: grabbing;
+}
+
+.canvas-instance.selected {
+  outline: 2px solid #2168d6;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.canvas-selection {
+  position: absolute;
+  inset: -5px;
+  pointer-events: none;
+}
+
+.canvas-selection-tag {
+  position: absolute;
+  top: -24px;
+  left: -5px;
+  background: #2168d6;
+  color: #fff;
+  font: 10px 'DM Mono', monospace;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.renderer-label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.renderer-pill {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  background: #fff;
+  border: 3px solid #1f3a93;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.renderer-hub {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px #10182833;
+  overflow: hidden;
+}
+
+.renderer-arrow {
+  display: block;
+  overflow: visible;
+}
+
+.renderer-logocard {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.renderer-logocard.light {
+  background: #fff;
+  color: #141821;
+}
+
+.renderer-logocard.dark {
+  background: #1c2330;
+  color: #f3f5f7;
+}
+
+.renderer-logocard-hint {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.renderer-unsupported {
+  width: 100%;
+  height: 100%;
+  min-width: 180px;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 2px dashed #d9a021;
+  border-radius: 8px;
+  background: #fff8e6;
+  color: #7a5a12;
+  font-size: 12px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.renderer-unsupported strong {
+  font-size: 12px;
+}
+
+.renderer-unsupported span {
+  font: 11px 'DM Mono', monospace;
+}
+
+/* Stage 2B — editor layout with inspector */
+.scene-editor-main {
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.scene-editor-canvas {
+  flex: 1;
+  min-width: 0;
+}
+
+.scene-editor-canvas .scene-canvas-scroll {
+  height: 100%;
+}
+
+/* Stage 2B — resize handles */
+.canvas-resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid #2168d6;
+  border-radius: 3px;
+  z-index: 5;
+  touch-action: none;
+}
+
+.handle-nw { left: -7px; top: -7px; cursor: nwse-resize; }
+.handle-ne { right: -7px; top: -7px; cursor: nesw-resize; }
+.handle-sw { left: -7px; bottom: -7px; cursor: nesw-resize; }
+.handle-se { right: -7px; bottom: -7px; cursor: nwse-resize; }
+
+/* Stage 2B — group selection outline (non-interactive; chip is the handle) */
+.canvas-group-outline {
+  position: absolute;
+  border: 2px dashed #7a5af8;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.canvas-group-chip {
+  position: absolute;
+  top: -28px;
+  left: -2px;
+  background: #7a5af8;
+  color: #fff;
+  font: 10px 'DM Mono', monospace;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 4px;
+  white-space: nowrap;
+  cursor: grab;
+}
+
+.canvas-group-chip:active {
+  cursor: grabbing;
+}
+
+/* Stage 2B — inspector */
+.inspector {
+  width: 280px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  background: var(--panel);
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.inspector h2 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+.inspector-title {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.inspector-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.inspector-body section {
+  margin-bottom: 16px;
+}
+
+.inspector-body h3 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+.inspector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.inspector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.inspector-field input,
+.inspector-field select {
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--panel);
+  color: #141821;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 8px;
+  outline: 0;
+  width: 100%;
+}
+
+.inspector-field input:focus,
+.inspector-field select:focus {
+  border-color: #2168d6;
+}
+
+.inspector-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.inspector-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2168d6;
+}
+
+.inspector-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.inspector-row .button {
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+.inspector-props {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inspector-readonly {
+  font: 11px 'DM Mono', monospace;
+  background: var(--soft);
+  border-radius: 6px;
+  padding: 6px 8px;
+  word-break: break-all;
+}
+
+.inspector-error {
+  color: #b3261e;
+  font-size: 12px;
+  background: #fdecea;
+  border-radius: 7px;
+  padding: 8px 10px;
+}
+
+.inspector-bounds {
+  font: 11px 'DM Mono', monospace;
+  color: #141821;
+}
+
+.inspector-members {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inspector-member {
+  text-align: left;
+  font: 11px 'DM Mono', monospace;
+  border: 1px solid var(--border);
+  background: var(--soft);
+  border-radius: 7px;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.inspector-member:hover {
+  border-color: #2168d6;
+}
+
+.inspector-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 10px 'DM Mono', monospace;
+  color: var(--muted);
+}
+
+.inspector-multi {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2168d6;
+  background: #e8f0fe;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin: 0 0 10px;
+}
+
+/* Stage 2C — snap guides (temporary, interaction-only) */
+.snap-guide {
+  position: absolute;
+  z-index: 9999;
+  pointer-events: none;
+  background: #f44336;
+}
+
+.snap-vertical {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.snap-horizontal {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+/* Stage 2C — overlap indicator (informational only, never blocks placement) */
+.canvas-instance.is-overlapping {
+  outline: 2px dashed #f59e0b;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Stage 2C — layout toolbar */
+.layout-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 34px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.layout-toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.layout-toolbar-group .button {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.layout-toolbar-group .button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.layout-toolbar-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.layout-toolbar-notice {
+  font-size: 11px;
+  color: #2168d6;
+}
+
+.layout-toolbar-error {
+  font-size: 11px;
+  color: #b3261e;
+}
