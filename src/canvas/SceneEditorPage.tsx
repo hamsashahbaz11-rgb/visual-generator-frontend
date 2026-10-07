@@ -14,6 +14,7 @@ import type { Component, ComponentInstance, DocumentGroup } from '../types/api'
 import { SceneCanvas } from './SceneCanvas'
 import { ScenePreview } from './ScenePreview'
 import { Timeline } from '../components/timeline/Timeline'
+import { SceneRenderPanel } from '../components/render/SceneRenderPanel'
 import { Inspector } from './Inspector'
 import { LayoutToolbar } from './LayoutToolbar'
 
@@ -192,6 +193,7 @@ export function SceneEditorPage() {
             <div className="scene-editor-canvas">
               <ScenePreview document={document} definitions={definitions} frame={currentFrame} />
               <Timeline document={document} definitions={definitions} />
+              {sceneId && <SceneRenderPanel sceneId={sceneId} />}
             </div>
           </div>
         ) : (
@@ -200,6 +202,7 @@ export function SceneEditorPage() {
               <LayoutToolbar document={document} />
               <SceneCanvas document={document} definitions={definitions} />
               <Timeline document={document} definitions={definitions} />
+              {sceneId && <SceneRenderPanel sceneId={sceneId} />}
             </div>
             <Inspector document={document} definitions={definitions} />
           </div>

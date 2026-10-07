@@ -1363,6 +1363,43 @@ button {
   color: var(--muted);
 }
 
+.render-preview {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 8px;
+  background: #000;
+}
+
+.render-cancelled {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.render-history {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.render-history li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+
+.render-history li span:first-child {
+  font-weight: 700;
+  color: inherit;
+}
+
 .right-divider {
   height: 1px;
   background: var(--border);

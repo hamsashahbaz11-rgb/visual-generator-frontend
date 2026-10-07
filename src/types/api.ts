@@ -1,5 +1,6 @@
 export type AssetKind = 'audio' | 'video' | 'image' | 'logo' | 'side_video'
-export type RenderStatus = 'queued' | 'running' | 'done' | 'failed'
+export type RenderStatus = 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
+export type RenderSource = 'scene-document' | 'video-spec'
 
 export interface User { id: string; name: string; email: string }
 export interface AuthTokenResponse { user: User; token: string }
@@ -30,7 +31,9 @@ export interface Component {
 export interface Issue { path: string; code: string; message: string }
 export interface ValidationResult { valid: boolean; issues: Issue[] }
 export interface GenerationResponse { spec: Record<string, unknown>; issues: Issue[]; attempts: number }
-export interface Render { id: string; projectId: string; status: RenderStatus; progress: number; specSnapshot: Record<string, unknown>; outputAssetId?: string | null; error?: string | null; createdAt: string; updatedAt: string }
+export interface Render { id: string; projectId: string; sceneId?: string | null; clientKey?: string | null; status: RenderStatus; progress: number; specSnapshot: Record<string, unknown>; outputAssetId?: string | null; error?: string | null; createdAt: string; startedAt?: string | null; completedAt?: string | null; updatedAt: string }
+export interface RenderStatusPayload { id: string; projectId: string; sceneId: string | null; status: RenderStatus; progress: number; outputAssetId: string | null; error: string | null; source: RenderSource; startedAt: string | null; completedAt: string | null; createdAt: string; updatedAt: string }
+export const isTerminalRenderStatus = (status: RenderStatus): boolean => status === 'done' || status === 'failed' || status === 'cancelled'
 export interface ManualPromptResponse { promptText: string }
 export interface ApiErrorPayload { error?: { code?: string; message?: string; details?: unknown[] } }
 
