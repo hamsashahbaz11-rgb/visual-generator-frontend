@@ -38,8 +38,21 @@ export interface InstancePosition { x: number; y: number }
 export interface InstanceSize { width: number; height: number }
 export interface InstanceTransform { rotation: number; scaleX: number; scaleY: number }
 export interface InstanceStyle { opacity: number; [key: string]: unknown }
-export interface InstanceTiming { start: number; duration: number }
-export interface InstanceAnimation { enter: string[]; exit: string[]; keyframes: unknown[] }
+export interface InstanceTiming { start: number; duration: number; startFrame?: number; durationFrames?: number }
+export type TimelineEasingName = 'linear' | 'easeIn' | 'easeOut' | 'easeInOut'
+export type AnimatableProperty =
+  | 'position.x'
+  | 'position.y'
+  | 'size.width'
+  | 'size.height'
+  | 'transform.rotation'
+  | 'transform.scaleX'
+  | 'transform.scaleY'
+  | 'style.opacity'
+export interface TimelineKeyframe { frame: number; value: number; easing?: TimelineEasingName }
+export interface AnimationTrack { property: AnimatableProperty; keyframes: TimelineKeyframe[] }
+export interface InstanceAnimation { enter: string[]; exit: string[]; keyframes: unknown[]; tracks?: AnimationTrack[] }
+export interface SceneTimeline { fps: number; durationFrames: number }
 
 export interface ComponentInstance {
   id: string
@@ -76,6 +89,7 @@ export interface SceneDocument {
   description?: string | null
   duration?: number | null
   meta?: Record<string, unknown> | null
+  timeline?: SceneTimeline | null
   components: ComponentInstance[]
   groups: DocumentGroup[]
 }
