@@ -24,9 +24,27 @@ describe('timelineStore', () => {
     useTimelineStore.getState().togglePlaying()
     expect(useTimelineStore.getState().isPlaying).toBe(true)
     useTimelineStore.getState().setCurrentFrame(42, 300)
+    useTimelineStore.getState().selectKeyframe({ instanceId: 'a', property: 'position.x', frame: 42 })
+    useTimelineStore.getState().selectProperty('position.x')
     useTimelineStore.getState().reset()
     expect(useTimelineStore.getState().currentFrame).toBe(0)
     expect(useTimelineStore.getState().isPlaying).toBe(false)
+    expect(useTimelineStore.getState().selectedKeyframe).toBeNull()
+    expect(useTimelineStore.getState().selectedProperty).toBeNull()
+  })
+
+  it('holds keyframe/property selection as UI state (never document state)', () => {
+    expect(useTimelineStore.getState().selectedKeyframe).toBeNull()
+    useTimelineStore.getState().selectKeyframe({ instanceId: 'a', property: 'style.opacity', frame: 7 })
+    expect(useTimelineStore.getState().selectedKeyframe).toEqual({
+      instanceId: 'a',
+      property: 'style.opacity',
+      frame: 7,
+    })
+    useTimelineStore.getState().selectProperty('style.opacity')
+    expect(useTimelineStore.getState().selectedProperty).toBe('style.opacity')
+    useTimelineStore.getState().selectKeyframe(null)
+    expect(useTimelineStore.getState().selectedKeyframe).toBeNull()
   })
 
   it('exposes a pure clamp helper', () => {

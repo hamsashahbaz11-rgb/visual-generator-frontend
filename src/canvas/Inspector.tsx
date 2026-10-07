@@ -6,6 +6,7 @@ import { scenesApi } from '../services/scenes'
 import { getApiError } from '../services/api'
 import { groupBounds } from './bounds'
 import { describeInstance, instanceRefId, refPropsOf } from './references'
+import { AnimationInspector } from './AnimationInspector'
 
 interface InspectorProps {
   document: SceneDocument
@@ -180,6 +181,7 @@ function InstanceInspector({
           Visible
         </label>
       </section>
+      <AnimationInspector document={document} instance={instance} />
       <section>
         <h3>Layer</h3>
         <div className="inspector-grid">

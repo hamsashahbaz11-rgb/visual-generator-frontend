@@ -3833,3 +3833,143 @@ button {
   font-size: 11px;
   color: var(--muted);
 }
+
+/* Stage 3D — keyframe lanes */
+.tl-track-group {
+  border-bottom: 1px solid var(--border);
+}
+
+.tl-track-group .tl-row {
+  border-bottom: 0;
+}
+
+.tl-kf-lanes {
+  display: block;
+  padding: 2px 0 6px;
+}
+
+.tl-kf-empty {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 0 2px 24px;
+}
+
+.tl-kf-lane {
+  display: flex;
+  align-items: center;
+  height: 20px;
+}
+
+.tl-kf-lane-label {
+  flex: 0 0 160px;
+  width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.tl-kf-lane-track {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
+}
+
+.tl-kf-lane-count {
+  flex: 0 0 64px;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-keyframe {
+  position: absolute;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  transform: rotate(45deg);
+  background: #fff;
+  border: 2px solid #2168d6;
+  border-radius: 2px;
+  cursor: ew-resize;
+}
+
+.tl-keyframe:hover {
+  background: #d2e3fc;
+}
+
+.tl-keyframe.selected {
+  background: #2168d6;
+  box-shadow: 0 0 0 2px rgba(33, 104, 214, 0.35);
+}
+
+.tl-keyframe:focus-visible {
+  outline: 2px solid #174ea6;
+  outline-offset: 2px;
+}
+
+/* Stage 3D — animation section in the Inspector */
+.anim-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.anim-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anim-label {
+  flex: 1 1 auto;
+  font-size: 12px;
+}
+
+.anim-value {
+  flex: 0 0 auto;
+  min-width: 64px;
+  text-align: right;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.anim-key {
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.anim-key.keyed {
+  background: #2168d6;
+  border-color: #2168d6;
+  color: #fff;
+}
+
+.anim-row.animated .anim-label {
+  font-weight: 600;
+}
+
+.anim-editor {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.anim-editor h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.inspector-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0 0 8px;
+}

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { Component, DocumentGroup, SceneDocument } from '../../types/api'
+import type { AnimatableProperty, Component, DocumentGroup, SceneDocument } from '../../types/api'
 import { useDocumentStore } from '../../store/documentStore'
-import { useTimelineStore } from '../../store/timelineStore'
+import { useTimelineStore, type SelectedKeyframe } from '../../store/timelineStore'
 import { buildGroupTree, childGroups, groupChildInstances } from '../../canvas/documentTree'
 import { TimelineHeader } from './TimelineHeader'
 import { TimelineRuler } from './TimelineRuler'
 import { TimelineTrack } from './TimelineTrack'
 import { useTimelinePlayback } from './useTimelinePlayback'
+import { moveKeyframe } from './animationOps'
 import {
   clampFrame,
   frameFromTimelineX,
@@ -40,6 +41,11 @@ export function Timeline({ document, definitions }: TimelineProps) {
   const selectGroup = useDocumentStore((s) => s.selectGroup)
   const selectedInstanceId = useDocumentStore((s) => s.selectedInstanceId)
   const selectedInstanceIds = useDocumentStore((s) => s.selectedInstanceIds)
+  const patchLocalInstance = useDocumentStore((s) => s.patchLocalInstance)
+  const persistInstance = useDocumentStore((s) => s.persistInstance)
+  const selectedKeyframe = useTimelineStore((s) => s.selectedKeyframe)
+  const selectKeyframe = useTimelineStore((s) => s.selectKeyframe)
+  const selectProperty = useTimelineStore((s) => s.selectProperty)
 
   const meta = useMemo(() => resolveTimelineMeta(document), [document])
   const { fps, durationFrames } = meta
@@ -47,6 +53,11 @@ export function Timeline({ document, definitions }: TimelineProps) {
   const tracksRef = useRef<HTMLDivElement>(null)
   const [trackWidth, setTrackWidth] = useState(FALLBACK_TRACK_WIDTH)
   const draggingRef = useRef(false)
+  const kfDragRef = useRef<{
+    instanceId: string
+    property: AnimatableProperty
+    frame: number
+  } | null>(null)
 
   useLayoutEffect(() => {
     const el = tracksRef.current
@@ -85,13 +96,51 @@ export function Timeline({ document, definitions }: TimelineProps) {
   )
 
   // Dragging the playhead / ruler / lane background seeks; row labels select.
+  // Keyframe diamonds drag in time (local patch during drag, persist on release).
   useEffect(() => {
     if (typeof window === 'undefined') return
+    const frameAt = (clientX: number): number => {
+      const el = tracksRef.current
+      if (!el) return 0
+      const rect = el.getBoundingClientRect()
+      return frameFromTimelineX(clientX - rect.left, pixelsPerFrameFor(trackWidth, durationFrames), durationFrames)
+    }
     const onMove = (e: PointerEvent): void => {
+      const kfDrag = kfDragRef.current
+      if (kfDrag) {
+        const target = frameAt(e.clientX)
+        if (target !== kfDrag.frame) {
+          const instance = useDocumentStore.getState().document?.components.find(
+            (c) => c.id === kfDrag.instanceId,
+          )
+          if (instance) {
+            const result = moveKeyframe(
+              instance.animation,
+              kfDrag.property,
+              kfDrag.frame,
+              target,
+              durationFrames,
+            )
+            if (result.moved) {
+              patchLocalInstance(kfDrag.instanceId, { animation: result.animation })
+              kfDrag.frame = result.frame
+              selectKeyframe({
+                instanceId: kfDrag.instanceId,
+                property: kfDrag.property,
+                frame: result.frame,
+              })
+            }
+          }
+        }
+        return
+      }
       if (draggingRef.current) seekFromClientX(e.clientX)
     }
     const onUp = (): void => {
+      const kfDrag = kfDragRef.current
+      kfDragRef.current = null
       draggingRef.current = false
+      if (kfDrag) void persistInstance(kfDrag.instanceId).catch(() => undefined)
     }
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
@@ -99,7 +148,7 @@ export function Timeline({ document, definitions }: TimelineProps) {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
-  }, [seekFromClientX])
+  }, [seekFromClientX, trackWidth, durationFrames, patchLocalInstance, persistInstance, selectKeyframe])
 
   const onStep = useCallback(
     (delta: number) => {
@@ -107,6 +156,27 @@ export function Timeline({ document, definitions }: TimelineProps) {
       seekToFrame(currentFrame + delta)
     },
     [pause, seekToFrame, currentFrame],
+  )
+
+  const onSelectKeyframe = useCallback(
+    (selection: SelectedKeyframe) => {
+      selectKeyframe(selection)
+      selectProperty(selection.property)
+      selectInstance(selection.instanceId)
+    },
+    [selectKeyframe, selectProperty, selectInstance],
+  )
+
+  const onKeyframeDragStart = useCallback(
+    (
+      e: React.PointerEvent,
+      drag: { instanceId: string; property: AnimatableProperty; frame: number },
+    ): void => {
+      e.preventDefault()
+      pause()
+      kfDragRef.current = { ...drag }
+    },
+    [pause],
   )
 
   // Ruler, lane background, and playhead seek; row labels/state select.
@@ -160,19 +230,26 @@ export function Timeline({ document, definitions }: TimelineProps) {
   const groupTree = useMemo(() => buildGroupTree(document.groups), [document.groups])
 
   const rows: React.ReactNode[] = []
+  const rowCommon = {
+    document,
+    definitionNameOf,
+    fps,
+    pixelsPerFrame,
+    currentFrame,
+    onSelect: selectInstance,
+    onSelectKeyframe,
+    onKeyframeDragStart,
+    selectedKeyframe,
+  }
   for (const instance of topInstances) {
     rows.push(
       <TimelineRow
         key={instance.id}
         instanceId={instance.id}
-        document={document}
-        definitionNameOf={definitionNameOf}
         depth={0}
-        fps={fps}
-        pixelsPerFrame={pixelsPerFrame}
-        currentFrame={currentFrame}
+        expanded={selectedInstanceIds.includes(instance.id)}
         selected={selectedInstanceIds.includes(instance.id)}
-        onSelect={selectInstance}
+        {...rowCommon}
       />,
     )
   }
@@ -206,14 +283,10 @@ export function Timeline({ document, definitions }: TimelineProps) {
         <TimelineRow
           key={instance.id}
           instanceId={instance.id}
-          document={document}
-          definitionNameOf={definitionNameOf}
           depth={depth + 1}
-          fps={fps}
-          pixelsPerFrame={pixelsPerFrame}
-          currentFrame={currentFrame}
+          expanded={selectedInstanceIds.includes(instance.id)}
           selected={selectedInstanceIds.includes(instance.id)}
-          onSelect={selectInstance}
+          {...rowCommon}
         />,
       )
     }
@@ -279,21 +352,32 @@ function TimelineRow({
   document,
   definitionNameOf,
   depth,
+  expanded,
   fps,
   pixelsPerFrame,
   currentFrame,
   selected,
+  selectedKeyframe,
   onSelect,
+  onSelectKeyframe,
+  onKeyframeDragStart,
 }: {
   instanceId: string
   document: SceneDocument
   definitionNameOf: (id: string) => string
   depth: number
+  expanded: boolean
   fps: number
   pixelsPerFrame: number
   currentFrame: number
   selected: boolean
+  selectedKeyframe: SelectedKeyframe | null
   onSelect: (id: string) => void
+  onSelectKeyframe: (selection: SelectedKeyframe) => void
+  onKeyframeDragStart: (
+    e: React.PointerEvent,
+    drag: { instanceId: string; property: AnimatableProperty; frame: number },
+  ) => void
 }) {
   const instance = document.components.find((c) => c.id === instanceId)
   if (!instance) return null
@@ -309,7 +393,12 @@ function TimelineRow({
       bar={bar}
       active={active}
       selected={selected}
+      expanded={expanded}
+      pixelsPerFrame={pixelsPerFrame}
+      selectedKeyframe={selectedKeyframe}
       onSelect={onSelect}
+      onSelectKeyframe={onSelectKeyframe}
+      onKeyframeDragStart={onKeyframeDragStart}
     />
   )
 }

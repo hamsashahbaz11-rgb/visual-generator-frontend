@@ -144,6 +144,8 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       visible: current.visible,
       zIndex: current.zIndex,
       props: current.props,
+      timing: current.timing,
+      animation: current.animation,
     })
     get().upsertInstance(saved)
   },
