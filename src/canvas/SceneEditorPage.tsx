@@ -15,6 +15,7 @@ import { SceneCanvas } from './SceneCanvas'
 import { ScenePreview } from './ScenePreview'
 import { Timeline } from '../components/timeline/Timeline'
 import { SceneRenderPanel } from '../components/render/SceneRenderPanel'
+import { AiPanel } from '../components/ai/AiPanel'
 import { Inspector } from './Inspector'
 import { LayoutToolbar } from './LayoutToolbar'
 
@@ -203,6 +204,7 @@ export function SceneEditorPage() {
               <SceneCanvas document={document} definitions={definitions} />
               <Timeline document={document} definitions={definitions} />
               {sceneId && <SceneRenderPanel sceneId={sceneId} />}
+              {sceneId && <AiPanel sceneId={sceneId} onApplied={setDocument} />}
             </div>
             <Inspector document={document} definitions={definitions} />
           </div>

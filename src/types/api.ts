@@ -111,3 +111,21 @@ export type CreateInstanceInput = Partial<Omit<ComponentInstance, 'id' | 'sceneI
   props?: Record<string, unknown>
 }
 export type CreateGroupInput = { name: string; parentGroupId?: string | null; zIndex?: number }
+
+// Stage 4A: AI plan contract. Temporary structured intent applied through
+// the existing domain mutations — never a second document model.
+export type AISceneOperation = { type: string; [key: string]: unknown }
+export interface AIScenePlan { operations: AISceneOperation[] }
+export interface AIPlanUsage { promptTokens?: number; completionTokens?: number; totalTokens?: number }
+export interface AIPlanMeta {
+  requestId?: string
+  sceneId?: string
+  provider?: string
+  model?: string
+  contextVersion?: string
+  latencyMs?: number
+  usage?: AIPlanUsage
+}
+export interface AIPlanResponse { plan: AIScenePlan; meta: AIPlanMeta }
+export interface AppliedOperation { index: number; type: string; id?: string | null }
+export interface AIApplyResponse { applied: AppliedOperation[]; document: SceneDocument; meta?: AIPlanMeta }

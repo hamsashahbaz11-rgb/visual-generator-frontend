@@ -4010,3 +4010,63 @@ button {
   color: var(--muted);
   margin: 0 0 8px;
 }
+
+/* Stage 4A — AI plan panel (prompt → plan preview → apply) */
+.ai-panel {
+  margin-top: 18px;
+}
+
+.ai-panel textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px;
+  font: inherit;
+  font-size: 12px;
+  resize: vertical;
+  margin-bottom: 10px;
+  background: transparent;
+  color: inherit;
+}
+
+.ai-plan-card {
+  border: 1px solid #d7e4fa;
+  border-radius: 9px;
+  padding: 14px;
+  background: #f7faff;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dark .ai-plan-card {
+  background: #202d41;
+  border-color: #2c4a75;
+}
+
+.ai-plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.ai-plan-list {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 11px 'DM Mono';
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.ai-plan-empty {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+}
