@@ -11,6 +11,7 @@ import { componentsApi } from '../services/components'
 import { getApiError } from '../services/api'
 import type { Component, ComponentInstance, DocumentGroup } from '../types/api'
 import { SceneCanvas } from './SceneCanvas'
+import { ScenePreview } from './ScenePreview'
 import { Inspector } from './Inspector'
 import { LayoutToolbar } from './LayoutToolbar'
 
@@ -30,6 +31,7 @@ export function SceneEditorPage() {
 
   const [actionError, setActionError] = useState('')
   const [newSceneName, setNewSceneName] = useState('')
+  const [mode, setMode] = useState<'edit' | 'preview'>('edit')
 
   const scenesQuery = useQuery({
     queryKey: ['scenes', projectId],
@@ -149,6 +151,24 @@ export function SceneEditorPage() {
         <button className="button secondary" onClick={() => void loadDemo()}>
           <FlaskConical size={15} /> Load F=ma demo
         </button>
+        <span className="scene-editor-mode" role="group" aria-label="Editor mode">
+          <button
+            type="button"
+            className={`button secondary${mode === 'edit' ? ' active' : ''}`}
+            aria-pressed={mode === 'edit'}
+            onClick={() => setMode('edit')}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className={`button secondary${mode === 'preview' ? ' active' : ''}`}
+            aria-pressed={mode === 'preview'}
+            onClick={() => setMode('preview')}
+          >
+            Preview
+          </button>
+        </span>
         <span className="scene-editor-selection">
           <MousePointer2 size={14} />
           {selected
@@ -162,13 +182,21 @@ export function SceneEditorPage() {
         </div>
       )}
       {document ? (
-        <div className="scene-editor-main">
-          <div className="scene-editor-canvas">
-            <LayoutToolbar document={document} />
-            <SceneCanvas document={document} definitions={definitions} />
+        mode === 'preview' ? (
+          <div className="scene-editor-main">
+            <div className="scene-editor-canvas">
+              <ScenePreview document={document} definitions={definitions} />
+            </div>
           </div>
-          <Inspector document={document} definitions={definitions} />
-        </div>
+        ) : (
+          <div className="scene-editor-main">
+            <div className="scene-editor-canvas">
+              <LayoutToolbar document={document} />
+              <SceneCanvas document={document} definitions={definitions} />
+            </div>
+            <Inspector document={document} definitions={definitions} />
+          </div>
+        )
       ) : (
         <div className="loading-panel"><p>No scene loaded.</p></div>
       )}

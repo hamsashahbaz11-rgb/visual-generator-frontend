@@ -3617,3 +3617,23 @@ button {
   font-size: 11px;
   color: #b3261e;
 }
+
+/* Stage 2D — Edit/Preview mode toggle */
+.scene-editor-mode {
+  display: inline-flex;
+  gap: 0;
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.scene-editor-mode .button {
+  border: 0;
+  border-radius: 0;
+}
+
+.scene-editor-mode .button.active {
+  background: #2168d6;
+  color: #fff;
+}

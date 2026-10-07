@@ -16,7 +16,7 @@ export interface CanvasViewport {
 export const DEFAULT_VIEWPORT: CanvasViewport = { scale: 1, offsetX: 0, offsetY: 0 }
 
 /** Logical scene size in world units. Components position themselves inside it. */
-export const WORLD = { width: 1600, height: 900 } as const
+export { WORLD } from '@app/render'
 
 export const worldToScreen = (
   point: { x: number; y: number },

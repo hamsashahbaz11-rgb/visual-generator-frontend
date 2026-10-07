@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { Component, ComponentInstance, SceneDocument } from '../types/api'
-import { componentBounds, connectorPoints } from './bounds'
-import { instanceRefId, resolveInstanceRef } from './references'
+import { connectorEndpointsFor } from '@app/render'
 
 // Renderer registry (Stage 2A).
 //
@@ -96,13 +95,11 @@ const ArrowRenderer = ({ instance, document }: RendererProps): JSX.Element => {
   const color = paletteColor(props.color) ?? '#2B2620'
   const markerId = `arrowhead-${instance.id}`
 
-  const fromId = instanceRefId(instance, 'from')
-  const toId = instanceRefId(instance, 'to')
-  const from = fromId ? resolveInstanceRef(document.components, fromId) : undefined
-  const to = toId ? resolveInstanceRef(document.components, toId) : undefined
+  // Shared reference semantics: endpoints resolve from the scene document.
+  const endpoints = connectorEndpointsFor(document.components, instance)
 
-  if (from && to && from.visible !== false && to.visible !== false) {
-    const { p1, p2 } = connectorPoints(componentBounds(from), componentBounds(to))
+  if (endpoints) {
+    const { p1, p2 } = endpoints
     const pad = 16
     const originX = Math.min(p1.x, p2.x) - pad
     const originY = Math.min(p1.y, p2.y) - pad
