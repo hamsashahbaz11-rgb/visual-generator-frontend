@@ -4016,6 +4016,13 @@ button {
   margin-top: 18px;
 }
 
+/* Stage 4B — plan/execute actions sit side by side */
+.ai-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .ai-panel textarea {
   width: 100%;
   border: 1px solid var(--border);

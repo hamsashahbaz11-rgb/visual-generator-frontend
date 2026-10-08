@@ -129,3 +129,36 @@ export interface AIPlanMeta {
 export interface AIPlanResponse { plan: AIScenePlan; meta: AIPlanMeta }
 export interface AppliedOperation { index: number; type: string; id?: string | null }
 export interface AIApplyResponse { applied: AppliedOperation[]; document: SceneDocument; meta?: AIPlanMeta }
+
+// Stage 4B: bounded agent execution. The server owns every budget and the
+// termination decision; `status` reports how the bounded loop ended, and
+// `document` is always the current snapshot (earlier iterations may have
+// applied even when status !== 'completed').
+export type AIExecuteStatus =
+  | 'completed'
+  | 'max_iterations'
+  | 'validation_failed'
+  | 'tool_error'
+  | 'provider_error'
+  | 'application_error'
+  | 'unauthorized'
+  | 'timeout'
+export interface AIAgentVerificationResult { passed: boolean; issues: string[] }
+export interface AIAgentAppliedOperation {
+  iteration: number
+  index: number
+  type: string
+  id?: string | null
+}
+export interface AIExecuteResponse {
+  status: AIExecuteStatus
+  iterations: number
+  toolCalls: number
+  modelCalls: number
+  plans: AIScenePlan[]
+  appliedOperations: AIAgentAppliedOperation[]
+  verification: AIAgentVerificationResult | null
+  failure?: { code: string; message: string }
+  document: SceneDocument
+  meta: AIPlanMeta
+}
