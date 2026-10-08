@@ -84,12 +84,11 @@ export function ManualSpecDialog({
         rawResponse: submittedJson.trim(),
         save: false,
       })
-      showToast('Spec generated successfully!', 'success')
       await onSuccess(response.spec)
+      showToast('Spec generated and saved successfully!', 'success')
       onClose()
     } catch (reason) {
       const errorMessage = getApiError(reason, 'Failed to submit manual spec')
-      console.log(errorMessage,reason,'\n\n error');
       setSubmitError(errorMessage)
       showToast(errorMessage, 'error')
     } finally {

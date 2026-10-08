@@ -4,6 +4,10 @@ import { DashboardPage } from './pages/DashboardPage'
 import { EditorPage } from './pages/EditorPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { ComponentsPage } from './pages/components/ComponentsPage'
+import { ComponentFormPage } from './pages/components/ComponentFormPage'
+import { ComponentDetailPage } from './pages/components/ComponentDetailPage'
+import { CanvasLanding, SceneEditorPage } from './canvas/SceneEditorPage'
 
 export function App() {
   return <Routes>
@@ -12,6 +16,12 @@ export function App() {
     <Route element={<AuthGuard />}>
       <Route path="/" element={<DashboardPage />} />
       <Route path="/projects/:id" element={<EditorPage />} />
+      <Route path="/projects/:projectId/canvas" element={<CanvasLanding />} />
+      <Route path="/projects/:projectId/scenes/:sceneId" element={<SceneEditorPage />} />
+      <Route path="/components" element={<ComponentsPage />} />
+      <Route path="/components/new" element={<ComponentFormPage />} />
+      <Route path="/components/:id" element={<ComponentDetailPage />} />
+      <Route path="/components/:id/edit" element={<ComponentFormPage />} />
     </Route>
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
