@@ -73,7 +73,7 @@ export function ComponentFormPage() {
         colorProps: component.colorProps || [],
         refProps: component.refProps || [],
         assetProps: component.assetProps || [],
-        isPublic: component.isPublic === true || component.isPublic === 'true',
+        isPublic: component.isPublic,
       }
       setFormData(data)
       setPropsSchemaJson(JSON.stringify(data.propsSchema, null, 2))
@@ -168,7 +168,7 @@ export function ComponentFormPage() {
         colorProps: component.colorProps,
         refProps: component.refProps,
         assetProps: component.assetProps,
-        isPublic: component.isPublic === true || component.isPublic === 'true',
+        isPublic: component.isPublic,
       })
       setPropsSchemaJson(JSON.stringify(component.propsSchema, null, 2))
       setDefaultPropsJson(JSON.stringify(component.defaultProps, null, 2))

@@ -81,7 +81,7 @@ export function ComponentDetailPage() {
     )
   }
 
-  const isPublic = component.isPublic === true || component.isPublic === 'true'
+  const isPublic = component.isPublic
 
   return (
     <div className="detail-page">

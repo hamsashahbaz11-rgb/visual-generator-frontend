@@ -241,6 +241,12 @@ function KeyframeEditor({
           <option value="easeIn">easeIn</option>
           <option value="easeOut">easeOut</option>
           <option value="easeInOut">easeInOut</option>
+          <option value="easeInQuad">easeInQuad</option>
+          <option value="easeOutQuad">easeOutQuad</option>
+          <option value="easeInCubic">easeInCubic</option>
+          <option value="easeOutCubic">easeOutCubic</option>
+          <option value="easeInBack">easeInBack</option>
+          <option value="easeOutBack">easeOutBack</option>
         </select>
       </label>
       <div className="inspector-row">

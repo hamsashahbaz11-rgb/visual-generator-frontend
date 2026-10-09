@@ -230,7 +230,7 @@ function ComponentCard({
   onDelete: () => void
   deleting: boolean
 }) {
-  const isPublic = component.isPublic === true || component.isPublic === 'true'
+  const isPublic = component.isPublic
 
   return (
     <article className="component-card">

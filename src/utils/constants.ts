@@ -1,4 +1,5 @@
-export const API_BASE_URL = 'http://localhost:3002'
+// API base URL - defaults to localhost:3001 for development, but can be overridden via VITE_API_BASE_URL
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001'
 export const RENDER_POLL_INTERVAL = 2000
 export const ACCESS_TOKEN_KEY = 'framewell_access_token'
 export const DEFAULT_SPEC = {

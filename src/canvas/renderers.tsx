@@ -1,13 +1,15 @@
 import type { CSSProperties } from 'react'
 import type { Component, ComponentInstance, SceneDocument } from '../types/api'
-import { connectorEndpointsFor } from '@app/render'
+import { connectorEndpointsFor, BUILT_IN_RENDERER_KEYS } from '@app/render'
 
 // Renderer registry (Stage 2A).
 //
 // Maps a component *definition name* to its visual renderer:
 //   ComponentInstance → componentDefinition → registry → React component
 //
-// Extend by calling registerRenderer(name, renderer). No canvas changes needed.
+// The authoritative list of supported renderer keys comes from @app/render.
+// Only these keys will have registered renderers; unknown keys fall back to
+// UnsupportedRenderer.
 
 export interface RendererProps {
   instance: ComponentInstance
@@ -30,6 +32,9 @@ export const resolveRenderer = (definitionName: string): Renderer =>
   registry.get(definitionName) ?? UnsupportedRenderer
 
 export const registeredRendererNames = (): string[] => [...registry.keys()]
+
+export const isSupportedRendererKey = (name: string): boolean =>
+  BUILT_IN_RENDERER_KEYS.includes(name as typeof BUILT_IN_RENDERER_KEYS[number])
 
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
@@ -177,11 +182,24 @@ export const UnsupportedRenderer = ({ definitionName }: RendererProps): JSX.Elem
   </div>
 )
 
+// Register built-in renderers. Keep in sync with BUILT_IN_RENDERER_KEYS from @app/render.
 registerRenderer('Label', LabelRenderer)
 registerRenderer('CounterPill', CounterPillRenderer)
 registerRenderer('Hub', HubRenderer)
 registerRenderer('Arrow', ArrowRenderer)
 registerRenderer('LogoCard', LogoCardRenderer)
+
+// Development-only assertion: registered renderers must match authoritative keys.
+if (import.meta.env.DEV) {
+  const registered = registeredRendererNames().sort()
+  const authoritative = [...BUILT_IN_RENDERER_KEYS].sort()
+  if (JSON.stringify(registered) !== JSON.stringify(authoritative)) {
+    console.error(
+      '[renderer registry drift] Registered keys:', registered,
+      'Authoritative keys:', authoritative,
+    )
+  }
+}
 
 export const instanceStyle = (
   instance: ComponentInstance,

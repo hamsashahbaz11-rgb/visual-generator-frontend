@@ -23,7 +23,7 @@ export interface Component {
   refProps: string[];
   assetProps: string[];
   userId?: string | null;
-  isPublic: boolean | string;
+  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
   matchedField?: 'name' | 'description';
@@ -42,7 +42,17 @@ export interface InstanceSize { width: number; height: number }
 export interface InstanceTransform { rotation: number; scaleX: number; scaleY: number }
 export interface InstanceStyle { opacity: number; [key: string]: unknown }
 export interface InstanceTiming { start: number; duration: number; startFrame?: number; durationFrames?: number }
-export type TimelineEasingName = 'linear' | 'easeIn' | 'easeOut' | 'easeInOut'
+export type TimelineEasingName =
+  | 'linear'
+  | 'easeIn'
+  | 'easeOut'
+  | 'easeInOut'
+  | 'easeInQuad'
+  | 'easeOutQuad'
+  | 'easeInCubic'
+  | 'easeOutCubic'
+  | 'easeInBack'
+  | 'easeOutBack';
 export type AnimatableProperty =
   | 'position.x'
   | 'position.y'

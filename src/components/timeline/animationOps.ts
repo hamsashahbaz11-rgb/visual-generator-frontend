@@ -43,7 +43,7 @@ export const trackLabel = (property: AnimatableProperty): string =>
   TRACK_LABELS[property] ?? property
 
 export const isSupportedEasing = (value: unknown): value is TimelineEasingName =>
-  (EASING_NAMES as readonly string[]).includes(value as string)
+  isEasingName(value)
 
 /** Read one animatable value from a base OR evaluated instance shape. */
 export const readAnimatedValue = (

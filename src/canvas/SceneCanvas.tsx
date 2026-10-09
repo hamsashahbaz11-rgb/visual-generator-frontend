@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import type { Component, ComponentInstance, DocumentGroup, SceneDocument } from '../types/api'
-import { useDocumentStore } from '../store/documentStore'
+import { useDocumentStore, type PersistResult } from '../store/documentStore'
 import { scenesApi } from '../services/scenes'
+import { useToast } from '../hooks/useToast'
 import { instanceStyle, resolveRenderer } from './renderers'
 import { childGroups, groupChildInstances, topLevelInstances } from './documentTree'
 import { WORLD, screenToWorld, worldToScreen, DEFAULT_VIEWPORT } from './viewport'
@@ -77,6 +78,10 @@ export function SceneCanvas({ document, definitions }: CanvasProps) {
   const patchLocalInstances = useDocumentStore((s) => s.patchLocalInstances)
   const persistInstance = useDocumentStore((s) => s.persistInstance)
   const upsertInstance = useDocumentStore((s) => s.upsertInstance)
+  const deleteInstance = useDocumentStore((s) => s.deleteInstance)
+  const deleteGroup = useDocumentStore((s) => s.deleteGroup)
+  const clearPersistError = useDocumentStore((s) => s.clearPersistError)
+  const { showToast } = useToast()
   const dragRef = useRef<InstanceDrag | GroupDrag | null>(null)
   const resizeRef = useRef<ResizeDrag | null>(null)
   const [snap, setSnap] = useState<{ guides: SnapGuide[]; activeIds: string[] }>({
@@ -171,35 +176,41 @@ export function SceneCanvas({ document, definitions }: CanvasProps) {
         setSnap({ guides: snapped.guides, activeIds: drag.memberIds })
       }
     }
-    const onUp = () => {
+    const onUp = async () => {
+      clearPersistError()
       const resize = resizeRef.current
       resizeRef.current = null
       if (resize?.moved) {
-        persistInstance(resize.id).catch(() => undefined)
+        const result = await persistInstance(resize.id)
+        if (!result.success) {
+          showToast(result.error ?? 'Failed to save resize', 'error')
+        }
       }
       setSnap({ guides: [], activeIds: [] })
       const drag = dragRef.current
       dragRef.current = null
       if (!drag?.moved) return
       if (drag.kind === 'instance') {
-        // Persist via the existing Stage 1 move operation. Local state already
-        // shows the new position; the server response reconciles it.
         const latest = useDocumentStore.getState().document?.components.find((c) => c.id === drag.id)
         if (!latest) return
-        scenesApi
-          .moveInstance(drag.id, latest.position)
-          .then((saved) => upsertInstance(saved))
-          .catch(() => undefined)
+        try {
+          const saved = await scenesApi.moveInstance(drag.id, latest.position)
+          upsertInstance(saved)
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : 'Failed to save position', 'error')
+        }
       } else {
         const state = useDocumentStore.getState()
-        void Promise.all(
-          drag.memberIds.map((id) => {
+        await Promise.all(
+          drag.memberIds.map(async (id) => {
             const latest = state.document?.components.find((c) => c.id === id)
-            if (!latest) return Promise.resolve()
-            return scenesApi
-              .moveInstance(id, latest.position)
-              .then((saved) => upsertInstance(saved))
-              .catch(() => undefined)
+            if (!latest) return
+            try {
+              const saved = await scenesApi.moveInstance(id, latest.position)
+              upsertInstance(saved)
+            } catch (error) {
+              showToast(error instanceof Error ? error.message : 'Failed to save group position', 'error')
+            }
           }),
         )
       }
@@ -213,6 +224,53 @@ export function SceneCanvas({ document, definitions }: CanvasProps) {
       window.removeEventListener('pointercancel', onUp)
     }
   }, [document, moveLocalInstance, patchLocalInstance, patchLocalInstances, persistInstance, upsertInstance])
+
+  // Keyboard handler for Delete/Backspace to delete selected instances/groups.
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle Delete/Backspace when not in an input field.
+      const target = event.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
+
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        event.preventDefault()
+
+        const instanceIds = selectedInstanceIds
+        const groupIds = selectedGroupIds
+        const sceneId = document?.id
+
+        if (!sceneId) return
+
+        const deletePromises: Promise<PersistResult>[] = []
+
+        if (instanceIds.length > 0) {
+          instanceIds.forEach((id) => {
+            deletePromises.push(deleteInstance(id, sceneId))
+          })
+        }
+
+        if (groupIds.length > 0) {
+          groupIds.forEach((id) => {
+            deletePromises.push(deleteGroup(id, sceneId))
+          })
+        }
+
+        if (deletePromises.length === 0) return
+
+        Promise.all(deletePromises).then((results: PersistResult[]) => {
+          const failures = results.filter((r: PersistResult) => !r.success)
+          if (failures.length > 0) {
+            failures.forEach((f: PersistResult) => {
+              showToast(f.error ?? 'Failed to delete', 'error')
+            })
+          }
+        })
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedInstanceIds, selectedGroupIds, document?.id, deleteInstance, deleteGroup, showToast])
 
   const beginDrag = (
     event: React.PointerEvent,

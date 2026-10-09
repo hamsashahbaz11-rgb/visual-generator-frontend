@@ -2,6 +2,12 @@ import { create } from 'zustand'
 import type { ComponentInstance, DocumentGroup, SceneDocument } from '../types/api'
 import { scenesApi } from '../services/scenes'
 import { normalizeDocumentLayers } from '../canvas/layout'
+import { parseApiError } from '../services/api'
+
+interface PersistResult {
+  success: boolean
+  error?: string
+}
 
 interface DocumentState {
   document: SceneDocument | null
@@ -12,6 +18,8 @@ interface DocumentState {
   /** Multi-selection (editor state only, never written to the document). */
   selectedInstanceIds: string[]
   selectedGroupIds: string[]
+  /** Transient error from last drag/resize persistence (cleared on next interaction). */
+  lastPersistError: string | null
   loadDocument: (sceneId: string) => Promise<void>
   setDocument: (document: SceneDocument | null) => void
   selectInstance: (id: string | null) => void
@@ -26,18 +34,26 @@ interface DocumentState {
   patchLocalInstance: (id: string, patch: Partial<ComponentInstance>) => void
   patchLocalInstances: (patches: Array<{ id: string; patch: Partial<ComponentInstance> }>) => void
   /** Persist the current local state of one instance via the Stage 1 API. */
-  persistInstance: (id: string) => Promise<void>
+  persistInstance: (id: string) => Promise<PersistResult>
   /** Persist several instances (layout ops); resolves when all are saved. */
-  persistInstances: (ids: string[]) => Promise<void[]>
+  persistInstances: (ids: string[]) => Promise<PersistResult[]>
   /** Normalize every layer scope to 0..n-1, preserving visual order. */
   normalizeLayers: () => Promise<{ instances: number; groups: number }>
   upsertInstance: (instance: ComponentInstance) => void
+  /** Local-only removal (used by deleteInstance after server success). */
   removeInstance: (id: string) => void
+  /** Delete an instance locally and on the server. */
+  deleteInstance: (id: string, sceneId: string) => Promise<PersistResult>
   upsertGroup: (group: DocumentGroup) => void
+  /** Delete a group locally and on the server. */
+  deleteGroup: (id: string, sceneId: string) => Promise<PersistResult>
   removeGroup: (id: string) => void
+  /** Clear the transient persistence error. */
+  clearPersistError: () => void
 }
 
 // Minimal Stage 1 state: load + represent the document. Canvas interaction is Stage 2.
+export type { PersistResult }
 export const useDocumentStore = create<DocumentState>((set, get) => ({
   document: null,
   loading: false,
@@ -46,6 +62,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   selectedGroupId: null,
   selectedInstanceIds: [],
   selectedGroupIds: [],
+  lastPersistError: null,
   loadDocument: async (sceneId: string) => {
     set({ loading: true, error: null })
     try {
@@ -135,21 +152,30 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     }),
   persistInstance: async (id) => {
     const current = get().document?.components.find((c) => c.id === id)
-    if (!current) return
-    const saved = await scenesApi.updateInstance(id, {
-      position: current.position,
-      size: current.size,
-      transform: current.transform,
-      style: current.style,
-      visible: current.visible,
-      zIndex: current.zIndex,
-      props: current.props,
-      timing: current.timing,
-      animation: current.animation,
-    })
-    get().upsertInstance(saved)
+    if (!current) return { success: false, error: 'Instance not found' }
+    try {
+      const saved = await scenesApi.updateInstance(id, {
+        position: current.position,
+        size: current.size,
+        transform: current.transform,
+        style: current.style,
+        visible: current.visible,
+        zIndex: current.zIndex,
+        props: current.props,
+        timing: current.timing,
+        animation: current.animation,
+      })
+      get().upsertInstance(saved)
+      return { success: true }
+    } catch (error) {
+      const message = parseApiError(error).message
+      return { success: false, error: message }
+    }
   },
-  persistInstances: (ids) => Promise.all(ids.map((id) => get().persistInstance(id))),
+  persistInstances: async (ids) => {
+    const results = await Promise.all(ids.map((id) => get().persistInstance(id)))
+    return results
+  },
   normalizeLayers: async () => {
     const document = get().document
     if (!document) return { instances: 0, groups: 0 }
@@ -174,6 +200,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       groups: savedGroups.filter((g) => g !== null).length,
     }
   },
+  clearPersistError: () => set({ lastPersistError: null }),
   upsertInstance: (instance) =>
     set((state) =>
       state.document
@@ -200,6 +227,17 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
           }
         : state,
     ),
+  /** Delete an instance on the server and locally. */
+  deleteInstance: async (id: string, sceneId: string) => {
+    try {
+      await scenesApi.deleteInstance(id)
+      get().removeInstance(id)
+      return { success: true }
+    } catch (error) {
+      const message = parseApiError(error).message
+      return { success: false, error: message }
+    }
+  },
   upsertGroup: (group) =>
     set((state) =>
       state.document
@@ -231,4 +269,15 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
           }
         : state,
     ),
+  /** Delete a group on the server and locally. */
+  deleteGroup: async (id: string, sceneId: string) => {
+    try {
+      await scenesApi.deleteGroup(id)
+      get().removeGroup(id)
+      return { success: true }
+    } catch (error) {
+      const message = parseApiError(error).message
+      return { success: false, error: message }
+    }
+  },
 }))

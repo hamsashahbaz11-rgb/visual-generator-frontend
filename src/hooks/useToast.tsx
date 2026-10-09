@@ -53,7 +53,12 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
 export function useToast() {
   const context = useContext(ToastContext)
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider')
+    // Return a no-op implementation for use outside ToastProvider (e.g., in tests)
+    return {
+      toasts: [],
+      showToast: () => {},
+      dismissToast: () => {},
+    }
   }
   return context
 }
