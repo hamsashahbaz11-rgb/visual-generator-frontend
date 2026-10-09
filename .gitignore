@@ -32,3 +32,12 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# Next.js build output (web/ App Router site)
+.next/
+web/.next/
+next-env.d.ts
+# Playwright
+test-results/
+playwright-report/
+

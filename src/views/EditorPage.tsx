@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ArrowUpRight, CheckCircle, Code2, Copy, FileAudio, FileImage, FileVideo, Film, Frame, Share2, Trash2, WandSparkles, XCircle } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '../routing/navigation'
 import { Navbar } from '../components/layout/Navbar'
 import { AssetUploader } from '../components/assets/AssetUploader'
 import { SpecEditor } from '../components/editor/SpecEditor'
@@ -8,7 +8,7 @@ import { RenderJobsList } from '../components/render/RenderJobsList'
 import { ErrorAlert } from '../components/common/ErrorAlert'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { useAssetTranscripts, useAssets, useGeneration, useProject, useRenders } from '../hooks/useApi'
-import { getApiError, parseApiError } from '../services/api'
+import { getApiError } from '../services/api'
 import { apiClient } from '../services/api'
 import { formatBytes, formatDuration } from '../utils/formatters'
 import type { AssetKind, Project } from '../types/api'
@@ -36,8 +36,8 @@ export function EditorPage() {
   const [validationResult, setValidationResult] = useState<{ valid: boolean; issues: { path: string; code: string; message: string }[] } | null>(null)
   const [manualSpecDialog, setManualSpecDialog] = useState<{ open: boolean; transcriptId: string; instructions: string } | null>(null)
 
-  if (isLoading) return <div className="app"><Navbar onBack={() => navigate('/')} /><div className="loading-panel"><LoadingSpinner /></div></div>
-  if (!project) return <div className="app"><Navbar onBack={() => navigate('/')} /><main className="dashboard-page"><ErrorAlert message={getApiError(error, 'Project not found')} /></main></div>
+  if (isLoading) return <div className="app"><Navbar onBack={() => navigate('/dashboard')} /><div className="loading-panel"><LoadingSpinner /></div></div>
+  if (!project) return <div className="app"><Navbar onBack={() => navigate('/dashboard')} /><main className="dashboard-page"><ErrorAlert message={getApiError(error, 'Project not found')} /></main></div>
 
   const notify = (value: string) => { setMessage(value); window.setTimeout(() => setMessage(''), 2800) }
   const upload = async (file: File, kind: AssetKind) => {
@@ -64,7 +64,7 @@ export function EditorPage() {
   }
 
   return <div className="app">
-    <Navbar projectName={project.name} onBack={() => navigate('/')} />
+    <Navbar projectName={project.name} onBack={() => navigate('/dashboard')} />
     <main className="editor-page">
       <aside className="asset-panel">
         <div className="panel-title"><div><p className="eyebrow">Project assets</p><h2>Media library</h2></div></div>

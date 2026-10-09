@@ -150,3 +150,39 @@ Ordered by dependency.
 
 - No code migrations, no Next.js scaffold, no schema changes, no git operations. Prompt 1 is the audit and planning stage.
 - No live external services were called.
+
+---
+
+## Prompt 2 status (2026-10-09)
+
+Completed and verified: P2-1 (shared render dependency), P2-2 (frontend CI and lint), P2-3 (hygiene: storage untracked, backend lint 26 to 16 warnings all in tests, frontend lint 0 errors), P2-4 (migration 0005 applied and verified), P2-5 (media, aspect, preset, effect contracts), P2-6 (parity tests at evaluator level), P2-7 (requireAdmin and ownership tests), P2-9 (public homepage and metadata; `robots.txt` and `sitemap.xml` NOT yet added).
+
+Partially done: P2-8 (Next.js). The Next app builds and serves `/`. The editor, dashboard, components, and auth pages remain on Vite. The cutover is carried into Prompt 3 as the first task.
+
+Not done in Prompt 2: P2-3 sub-item "remove 16 backend test-file lint warnings"; the 4 frontend `exhaustive-deps` warnings; `openapi.json` route check; scene 403/404 standardisation; browser tests of any kind.
+
+## Prompt 3 priority order (revised)
+
+1. Complete the editor cutover to Next.js (P2-8 remainder) with browser tests for routes and client navigation.
+2. Add `robots.txt` and `sitemap.xml` (P2-9 remainder).
+3. Standardise scene-ownership errors to 404 and add a frontend test for it.
+4. Worker and editor support for video clips, audio, captions, presets, and effects (P3-2, P3-3, P3-4, P3-5).
+5. Undo/redo and autosave (P3-1).
+6. AI, rendering reliability, Google sign-in, admin UI and entitlement enforcement (P3-6 to P3-9).
+
+---
+
+## Prompt 3 status (2026-10-09)
+
+Done and verified: Phase 0 (git state protected; media deletions unstaged), Phase 1 (Next 16 App Router is the only app; all routes migrated; public pages, robots, sitemap; 15 browser tests pass; one real CORS defect fixed).
+
+Not done: Phase 2 (media, layouts applied to scenes, effects, captions, audio, undo/redo, autosave states, render-with-worker verification, AI multi-scene), Phase 3 (Google sign-in, admin, entitlements, discounts, billing), Phase 4 full acceptance workflow (sign-in, uploads, presenter overlays, captions, MP4 export, admin grants).
+
+## Next steps, in order
+
+1. Start Redis (or a container) and run the render worker, then verify one real MP4 export and that its duration and layer order match the saved scene. Without this, the render path is unverified.
+2. Phase 2A: wire aspect ratio into projects and scenes (the column exists; the editor and worker do not read it), then layout presets applied to a scene.
+3. Phase 2B: image, video, audio, caption elements persisted as instances; worker composition support for each.
+4. Phase 2C: effects (fade, slide, zoom, spotlight) as keyframe-evaluated data, rendered identically in preview and worker.
+5. Phase 2A: undo/redo and autosave states, verified by reopening a project.
+6. Phase 3: Google sign-in, admin, entitlements, discounts, billing, each with tests and a dedicated test database before any migration.

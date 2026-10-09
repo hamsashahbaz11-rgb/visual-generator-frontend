@@ -228,7 +228,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         : state,
     ),
   /** Delete an instance on the server and locally. */
-  deleteInstance: async (id: string, sceneId: string) => {
+  deleteInstance: async (id: string, _sceneId: string) => {
     try {
       await scenesApi.deleteInstance(id)
       get().removeInstance(id)
@@ -270,7 +270,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         : state,
     ),
   /** Delete a group on the server and locally. */
-  deleteGroup: async (id: string, sceneId: string) => {
+  deleteGroup: async (id: string, _sceneId: string) => {
     try {
       await scenesApi.deleteGroup(id)
       get().removeGroup(id)

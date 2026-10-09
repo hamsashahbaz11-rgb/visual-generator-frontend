@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, Plus, Filter, ChevronDown, MoreVertical, Edit, Trash2, Eye, Copy, Globe, Lock, AlertTriangle, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { useNavigate } from '../../routing/navigation'
+import { Search, Plus, Filter, ChevronDown, Edit, Trash2, Eye, Copy, Globe, Lock, CheckCircle, Loader2 } from 'lucide-react'
 import { componentsApi } from '../../services/components'
 import type { Component } from '../../types/api'
 import { useToast } from '../../hooks/useToast'
@@ -53,7 +53,7 @@ export function ComponentsPage() {
 
       const data = await componentsApi.search(params)
       setComponents(data)
-    } catch (error) {
+    } catch {
       showToast('Failed to load components', 'error')
     } finally {
       setLoading(false)
@@ -79,7 +79,7 @@ export function ComponentsPage() {
       await componentsApi.delete(id)
       showToast('Component deleted', 'success')
       fetchComponents()
-    } catch (error) {
+    } catch {
       showToast('Failed to delete component', 'error')
     } finally {
       setDeletingId(null)
@@ -100,7 +100,7 @@ export function ComponentsPage() {
       await componentsApi.create(newComponent)
       showToast('Component duplicated', 'success')
       fetchComponents()
-    } catch (error) {
+    } catch {
       showToast('Failed to duplicate component', 'error')
     }
   }
@@ -125,7 +125,7 @@ export function ComponentsPage() {
 
   return (
     <div className="components-page">
-      <Navbar onBack={() => navigate('/')} />
+      <Navbar onBack={() => navigate('/dashboard')} />
       <header className="page-header">
         <div className="header-left">
           <h1>Components</h1>

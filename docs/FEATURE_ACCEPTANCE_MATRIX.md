@@ -148,3 +148,108 @@ Warnings only from the frontend build: `services/components.ts` is both dynamica
 | `tsconfig.tsbuildinfo` tracked | INCOMPLETE | Build artifact; `.gitignore` lists `*.tsbuildinfo`, so it is tracked despite ignore rule |
 | Backend lint warnings (26) | INCOMPLETE | Unused imports and variables; no errors |
 | Duplicate AI provider paths | INCOMPLETE | `services/ai/*` and `ai/*` both exist |
+
+---
+
+## Prompt 2 outcomes (verified 2026-10-09)
+
+Only items below marked VERIFIED were run and passed in this pass. Everything else keeps its audit status.
+
+### Check results after Prompt 2
+
+| Check | Frontend (clean clone, `npm ci`) | Backend (`pnpm`) |
+|---|---|---|
+| Install from lockfile, no sibling folder | PASS (414 packages) | PASS |
+| Typecheck / build | PASS (`tsc -b` + `vite build`) and PASS (`next build web`) | PASS (`pnpm build`, 7 packages) |
+| Lint | PASS, 0 errors, 4 warnings (`react-hooks/exhaustive-deps`, deliberately not auto-fixed) | PASS, 0 errors, 16 warnings (test files only) |
+| Tests | PASS, 22 files, 172 tests | PASS, 34 files, 497 tests (was 459) |
+
+### Status changes
+
+| Item | Was | Now | Evidence |
+|---|---|---|---|
+| Shared `@app/render` dependency | BROKEN for remote builds (sibling junction) | VERIFIED | Vendored tarball `vendor/app-render-0.1.0.tgz`; clean `npm ci` passes; `npm run check:render` confirms it matches the backend build |
+| Frontend CI | MISSING | VERIFIED (workflow written, runs the same commands verified locally) | `.github/workflows/ci.yml`. Not yet executed on GitHub (no push performed) |
+| Frontend lint | MISSING | VERIFIED | `eslint.config.js`; 0 errors |
+| Repository hygiene: tracked media | BROKEN | VERIFIED | 6 files untracked with `git rm --cached` (staged); files kept on disk; `**/storage/` ignored |
+| Drizzle snapshot consistency | UNVERIFIED | VERIFIED | `drizzle-kit generate` reports "No schema changes" |
+| Migration 0005 (additive) | MISSING | VERIFIED on the configured DB | `users.role` and `projects.aspect` added with defaults; 6 new tables; 23 users and 2 projects preserved (defaults `user` / `landscape`) |
+| Aspect ratio (landscape/portrait/square) | MISSING | VERIFIED (schema contract and DB column) | `packages/schema/src/media.ts`; 15 media tests. Editor picker NOT implemented (Prompt 3) |
+| Media element contracts (video clip, audio, caption) | MISSING | VERIFIED (schema only) | Zod contracts with trim/volume/cue validation. NOT rendered by the worker yet (Prompt 3) |
+| Layout presets (5) | MISSING | VERIFIED (data contract only) | `LAYOUT_PRESETS`; rectangle and aspect tests. Not applied in editor or worker yet |
+| Effects contract | MISSING | VERIFIED (schema only) | `EffectSchema` with scene/element/region targets. Not evaluated or rendered yet |
+| Admin role guard (`requireAdmin`) | MISSING | VERIFIED (unit) | 10 tests in `apps/api/test/authorization.test.ts` against the real `AuthService`. No admin routes exist yet |
+| Ownership of scenes, components | INCOMPLETE | VERIFIED on the real DB | 7 tests in `apps/api/test/ownership.test.ts`; fixtures removed after each run |
+| Preview/render parity | INCOMPLETE | VERIFIED at the evaluator level | 6 tests in `packages/render/test/parity.test.ts`. Editor and worker both call `renderSceneAtFrame` |
+| Next.js App Router | MISSING | PARTIAL | `web/app` builds; `/` is statically prerendered with SEO metadata. Editor, dashboard, and auth remain on Vite (see decisions D-01) |
+| Public marketing homepage | MISSING | VERIFIED (static HTML) | Prerendered HTML contains h1, title, description, Open Graph, and feature copy |
+| Google sign-in, plans, entitlements, discounts, admin UI | MISSING | UNCHANGED (tables only) | Tables exist for plans, entitlements, usage, grants, discounts. No routes, no OAuth, no enforcement |
+
+### Known gaps still open (not claimed as complete)
+
+- Undo/redo: MISSING (unchanged).
+- Document autosave: MISSING (unchanged).
+- Editor aspect picker, media elements in the canvas, captions, effects, transitions, and presets in the UI: MISSING (Prompt 3).
+- Worker rendering of new element types: MISSING (Prompt 3).
+- Editor migration to Next.js: NOT DONE (Prompt 3).
+- Live verification of Gemini, OpenRouter, Google, S3, SMTP, and a real Remotion render: NOT RUN.
+- `openapi.json` vs routes: NOT CHECKED.
+- Next-app browser behavior (client navigation, hydration): NOT TESTED. Only the static build and HTML were verified.
+
+---
+
+## Prompt 3 outcomes (verified 2026-10-09, Phase 1 and the first editor fix)
+
+Status key: PASS = verified by a run in this pass. FAIL = defect found. BLOCKED = requires external configuration not present. NOT STARTED = not implemented in this pass.
+
+### Phase 1: Next.js migration (gate)
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Next.js App Router is the only app (Vite and react-router removed) | PASS | `next build` compiles; `vite`/`react-router-dom` absent from direct dependencies; old `App.tsx`, `main.tsx`, `index.html` removed |
+| Next version | PASS | Next 16.4.0 (current major), React 19.3, Node 24 locally (Next 16 requires 20.9+). No Active/Maintenance LTS label was found in the official docs, so none is claimed |
+| Routes: `/`, `/login`, `/register`, `/dashboard`, `/projects/[id]`, `/projects/[id]/canvas`, `/projects/[id]/scenes/[sceneId]`, `/components`, `/components/new`, `/components/[id]`, `/components/[id]/edit` | PASS | Production build route table lists every route |
+| Public pages `/features`, `/templates`, `/pricing` | PASS | Built and tested. Pricing shows no invented prices; it states none are published |
+| `robots.txt`, `sitemap.xml` | PASS | Generated; contents checked. Sitemap contains only the four public pages. Robots disallows the app and auth pages |
+| Metadata, canonical URLs, Open Graph | PASS | Homepage E2E test checks title, description and og:title |
+| Protected routes redirect to login when unauthenticated | PASS | E2E 9a |
+| Login with a real account reaches the dashboard | PASS | E2E 3 (real register then login via the form) |
+| Wrong password shows an API error | PASS | E2E 9b |
+| Project not found shows the API error, not a blank page | PASS | E2E 4b |
+| Open project, canvas, scene editor | PASS | E2E 5 |
+| Timeline, animation inspector, AI panel, render panel present | PASS | E2E 7 (checks real labels: Scene timeline, Inspector, AI prompt, Refresh renders) |
+| Select element, edit a supported property, save, verify on server and after reload | PASS (after fix) | E2E 6. Server stores `position.x = 321`; value survives reload |
+| Scene load failure shows an error | PASS | E2E 8 |
+| No hydration errors on homepage | PASS | E2E 1 checks console for hydration messages |
+| Client state and navigation without hydration errors across the whole editor | PARTIAL | Only the homepage hydration check is asserted. Other pages are exercised but not checked for console hydration errors |
+
+### Defect found and fixed in this pass
+
+- **CORS blocked inspector saves.** The API preflight allowed only `GET, HEAD, POST`, so the browser rejected `PATCH /instances/:id` (the inspector's save) with `ERR_FAILED`. The API direct calls worked, which hid the problem. Fix: `@fastify/cors` now allows `GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS`, the verbs the routes serve. Regression test: `apps/api/test/cors.test.ts` (1 passing). Verified live: preflight returns 204 with PATCH in `Access-Control-Allow-Methods`.
+- The remaining CORS origin is `*` in the local `.env`. This is acceptable for local development only. Production must set `CORS_ORIGIN` to the deployed frontend origin.
+
+### Phase 2 and 3: NOT STARTED in this pass
+
+Phase 2 (formats, media elements, layout presets applied to scenes, effects, captions, audio, undo/redo, autosave with states, AI multi-scene) and Phase 3 (Google sign-in, admin panel, entitlements, discounts, billing) are not implemented. The contracts from the previous stage exist, but the editor and worker do not use them. These are not claimed as complete.
+
+### Verification commands and results (this pass)
+
+| Check | Command | Result |
+|---|---|---|
+| Frontend typecheck | `npx tsc --noEmit -p tsconfig.json` | PASS, 0 errors |
+| Frontend unit/component tests | `npx vitest run` | PASS, 22 files, 172 tests |
+| Frontend lint | `npx eslint .` | PASS, 0 errors, 4 warnings (`react-hooks/exhaustive-deps`, deliberately not auto-fixed) |
+| Frontend production build | `npx next build` | PASS, all routes compile |
+| Browser acceptance | `npx playwright test` (production build, live API on localhost:3002) | PASS, 15 tests (4 editor, 7 migration, 4 public) |
+| Backend build | `pnpm build` | PASS, 7 packages |
+| Backend tests | `pnpm vitest run` (with `.env` loaded for config-dependent suites) | PASS, 491 plus the 7 ownership tests and 1 CORS test |
+| Backend lint | `pnpm lint` | 0 errors; warnings in test files only |
+
+Test counts: frontend 172 unit plus 15 browser; backend 498 (was 459 at the start of Prompt 2).
+
+### Not verified in this pass
+
+- Redis and the render worker: not running locally (no Redis or Docker). Render-job tests and MP4 export were NOT executed in this pass. The existing worker smoke test passes only when the database is reachable.
+- Live AI (OpenRouter, Gemini): not called.
+- Google, billing, and SMTP: not configured or called.
+- Cross-browser: Chromium only.

@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp, Copy, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
-import { parseApiError, StructuredApiError } from '../../services/api'
+import { parseApiError } from '../../services/api'
 
 function formatDetails(details: unknown[]): string {
   if (!details.length) return ''
@@ -19,10 +19,11 @@ function formatDetails(details: unknown[]): string {
 }
 
 export function ErrorAlert({ message, error }: { message?: string; error?: unknown }) {
+  // Hooks must run unconditionally; the early return below must come after them.
+  const [expanded, setExpanded] = useState(false)
   const structured = error ? parseApiError(error) : message ? { code: '', message, details: [], issues: [] } : null
   if (!structured) return null
 
-  const [expanded, setExpanded] = useState(false)
   const detailsText = formatDetails(structured.details)
 
   return (

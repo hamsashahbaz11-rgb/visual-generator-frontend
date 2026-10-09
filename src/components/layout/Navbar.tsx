@@ -1,7 +1,7 @@
 import { Bell, ChevronDown, CircleHelp, Moon, Sun, Box, LayoutDashboard } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useUiStore } from '../../store/uiStore'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from '../../routing/navigation'
 
 export function Navbar({ projectName, onBack }: { projectName?: string; onBack?: () => void }) {
   const user = useAuthStore((state) => state.user)
@@ -29,8 +29,8 @@ export function Navbar({ projectName, onBack }: { projectName?: string; onBack?:
         ) : (
           <>
             <button
-              className={`nav-button ${isActive('/') ? 'active' : ''}`}
-              onClick={() => navigate('/')}
+              className={`nav-button ${isActive('/dashboard') ? 'active' : ''}`}
+              onClick={() => navigate('/dashboard')}
             >
               <LayoutDashboard size={18} /> Dashboard
             </button>

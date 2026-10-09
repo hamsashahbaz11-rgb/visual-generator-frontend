@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Activity, Film, Plus, Search, Sparkles, Zap } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '../routing/navigation'
 import { Navbar } from '../components/layout/Navbar'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { ErrorAlert } from '../components/common/ErrorAlert'

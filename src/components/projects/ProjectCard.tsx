@@ -1,4 +1,4 @@
-import { ArrowUpRight, Film, Play } from 'lucide-react'
+import { ArrowUpRight, Play } from 'lucide-react'
 import type { ProjectSummary } from '../../types/api'
 import { formatDate } from '../../utils/formatters'
 export function ProjectCard({ project, onOpen }: { project: ProjectSummary; onOpen: () => void }) { const initial = project.name.slice(0, 1).toUpperCase(); return <article className="project-card"><div className="project-art"><div className="art-grid" /><div className="art-label">{initial}</div><div className="duration"><Play size={10} fill="currentColor" />00:00</div></div><div className="project-info"><div className="status-line"><span className="status-dot draft" />Draft<span className="updated">{formatDate(project.updatedAt)}</span></div><h3>{project.name}</h3><button className="text-button" onClick={onOpen}>Open project <ArrowUpRight size={14} /></button></div></article> }

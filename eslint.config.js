@@ -1,0 +1,28 @@
+import js from '@eslint/js'
+import tseslint from 'typescript-eslint'
+import reactHooks from 'eslint-plugin-react-hooks'
+import prettier from 'eslint-config-prettier'
+import globals from 'globals'
+
+export default tseslint.config(
+  { ignores: ['dist/**', 'node_modules/**', 'vendor/**', 'coverage/**', '.next/**', 'web/.next/**', 'next-env.d.ts'] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    files: ['scripts/**/*.mjs', '*.config.{js,ts}', 'eslint.config.js'],
+    languageOptions: { globals: globals.node },
+  },
+  prettier,
+)

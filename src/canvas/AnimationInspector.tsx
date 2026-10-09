@@ -118,7 +118,7 @@ export function AnimationInspector({
 }
 
 function AnimationPropertyRow({
-  document,
+  document: _document,
   instance,
   property,
   currentFrame,

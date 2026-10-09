@@ -1,6 +1,5 @@
 import {
   ANIMATABLE_PROPERTIES,
-  EASING_NAMES,
   evaluateSceneAtFrame,
   interpolateKeyframes,
   isAnimatableProperty,
@@ -13,7 +12,6 @@ import type {
   AnimationTrack,
   ComponentInstance,
   InstanceAnimation,
-  SceneDocument,
   TimelineEasingName,
   TimelineKeyframe,
 } from '../../types/api'

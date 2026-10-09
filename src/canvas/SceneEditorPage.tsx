@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from '../routing/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, FlaskConical, MousePointer2, Plus } from 'lucide-react'
 import { Navbar } from '../components/layout/Navbar'
@@ -21,7 +21,7 @@ import { LayoutToolbar } from './LayoutToolbar'
 
 // Route page: one interactive canvas per SceneDocument.
 export function SceneEditorPage() {
-  const { projectId, sceneId } = useParams()
+  const { id: projectId, sceneId } = useParams()
   const navigate = useNavigate()
   const document = useDocumentStore((s) => s.document)
   const loading = useDocumentStore((s) => s.loading)
@@ -218,7 +218,7 @@ export function SceneEditorPage() {
 
 // Resolves /projects/:projectId/canvas → first scene (creating one if needed).
 export function CanvasLanding() {
-  const { projectId } = useParams()
+  const { id: projectId } = useParams()
   const navigate = useNavigate()
   const [error, setError] = useState('')
   useEffect(() => {

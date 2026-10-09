@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Save, Loader2, AlertTriangle, CheckCircle, XCircle, Clipboard, FileText, Eye, Globe, Lock, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from '../../routing/navigation'
+import { ArrowLeft, Save, Loader2, CheckCircle, XCircle, Clipboard, FileText, Globe, Lock, ChevronDown } from 'lucide-react'
 import { componentsApi } from '../../services/components'
-import type { Component } from '../../types/api'
 import { useToast } from '../../hooks/useToast'
 
 interface FormData {
@@ -78,7 +77,7 @@ export function ComponentFormPage() {
       setFormData(data)
       setPropsSchemaJson(JSON.stringify(data.propsSchema, null, 2))
       setDefaultPropsJson(JSON.stringify(data.defaultProps, null, 2))
-    } catch (error) {
+    } catch {
       showToast('Failed to load component', 'error')
       navigate('/components')
     } finally {

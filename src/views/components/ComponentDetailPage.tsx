@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Edit, Copy, Globe, Lock, Loader2, FileText, CheckCircle } from 'lucide-react'
+import { useParams, useNavigate } from '../../routing/navigation'
+import { ArrowLeft, Edit, Globe, Lock, Loader2, FileText } from 'lucide-react'
 import { componentsApi } from '../../services/components'
 import type { Component } from '../../types/api'
 import { useToast } from '../../hooks/useToast'
@@ -23,7 +23,7 @@ export function ComponentDetailPage() {
     try {
       const data = await componentsApi.get(id)
       setComponent(data)
-    } catch (error) {
+    } catch {
       showToast('Failed to load component', 'error')
       navigate('/components')
     } finally {

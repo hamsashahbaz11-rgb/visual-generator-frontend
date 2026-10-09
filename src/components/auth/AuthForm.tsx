@@ -13,7 +13,7 @@
 // }
 // ```tsx
 import { FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from '../../routing/navigation'
 import { Eye, EyeOff, Sparkles } from 'lucide-react'
 import { useAuth } from '../../hooks/useApi'
 import { getApiError } from '../../services/api'
@@ -51,7 +51,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     try {
       await mutation.mutateAsync(result.data as never)
       showToast(isRegister ? 'Account created successfully!' : 'Welcome back!', 'success')
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (reason) {
       const errorMessage = getApiError(reason, 'Unable to authenticate')
       setError(errorMessage)

@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, JSX } from 'react'
 import type { Component, ComponentInstance, SceneDocument } from '../types/api'
 import { connectorEndpointsFor, BUILT_IN_RENDERER_KEYS } from '@app/render'
 
@@ -190,7 +190,7 @@ registerRenderer('Arrow', ArrowRenderer)
 registerRenderer('LogoCard', LogoCardRenderer)
 
 // Development-only assertion: registered renderers must match authoritative keys.
-if (import.meta.env.DEV) {
+if (process.env.NODE_ENV !== 'production') {
   const registered = registeredRendererNames().sort()
   const authoritative = [...BUILT_IN_RENDERER_KEYS].sort()
   if (JSON.stringify(registered) !== JSON.stringify(authoritative)) {
